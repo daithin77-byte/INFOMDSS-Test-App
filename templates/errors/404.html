@@ -1,0 +1,6 @@
+{% extends "errors/error_base.html" %}
+{% block title %}404 Error{% endblock %}
+{% block error_body %}
+    <img class="mb-4 img-error" src="{{ url_for('static', filename='img/error-404-monochrome.svg') }}" />
+    <p class="lead">This requested URL was not found on this server.</p>
+{% endblock %}
