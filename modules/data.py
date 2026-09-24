@@ -28,25 +28,54 @@ SERVICE_AREA_COLUMNS, SERVICE_AREAS = _load_service_areas()
 SERVICE_AREA_COLUMN_LABELS = {c: _humanize(c) for c in SERVICE_AREA_COLUMNS}
 
 
-def area_chart_data():
-    return {
-        'labels': ['Mar 1', 'Mar 2', 'Mar 3', 'Mar 4', 'Mar 5', 'Mar 6', 'Mar 7',
-                   'Mar 8', 'Mar 9', 'Mar 10', 'Mar 11', 'Mar 12', 'Mar 13'],
-        'values': [10000, 30162, 26263, 18394, 18287, 28682, 31274, 33259,
-                   25849, 24159, 32651, 31984, 38451],
-    }
+def _parse_mw(value):
+    """'78.5 MW' -> 78.5; '-' or '' -> None."""
+    if not value:
+        return None
+    match = re.match(r'^\s*(-?\d+(?:\.\d+)?)', value)
+    return float(match.group(1)) if match else None
 
 
-def bar_chart_data():
-    return {
-        'labels': ['January', 'February', 'March', 'April', 'May', 'June'],
-        'values': [4215, 5312, 6251, 7841, 9821, 14984],
-    }
+_PALETTE = [
+    '#007bff', '#dc3545', '#ffc107', '#28a745',
+    '#17a2b8', '#6610f2', '#fd7e14', '#20c997', '#6c757d',
+]
 
 
-def pie_chart_data():
-    return {
-        'labels': ['Blue', 'Red', 'Yellow', 'Green'],
-        'values': [12.21, 15.58, 11.25, 8.32],
-        'colors': ['#007bff', '#dc3545', '#ffc107', '#28a745'],
-    }
+def operator_counts():
+    """Number of service areas each grid operator (rnb) appears in."""
+    counts = {}
+    for row in SERVICE_AREAS:
+        for operator in row['rnb'].split(','):
+            operator = operator.strip()
+            if operator:
+                counts[operator] = counts.get(operator, 0) + 1
+    ordered = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)
+    labels = [k for k, _ in ordered]
+    values = [v for _, v in ordered]
+    colors = [_PALETTE[i % len(_PALETTE)] for i in range(len(labels))]
+    return {'labels': labels, 'values': values, 'colors': colors}
+
+
+def top_required_capacity(direction='Injection', limit=10):
+    """The `limit` service areas with the highest required transport capacity."""
+    field = f'requiredTransportCapacity{direction}'
+    parsed = [(row['name'], _parse_mw(row[field])) for row in SERVICE_AREAS]
+    parsed = [(name, mw) for name, mw in parsed if mw is not None]
+    parsed.sort(key=lambda pair: pair[1], reverse=True)
+    top = parsed[:limit]
+    return {'labels': [name for name, _ in top], 'values': [mw for _, mw in top]}
+
+
+def resolution_timeline(direction='Injection'):
+    """Count of service areas by the year their congestion is expected to be solved."""
+    field = f'yearSolved{direction}'
+    counts = {}
+    for row in SERVICE_AREAS:
+        year = row[field].strip()
+        label = year if year and year != '-' else 'Not scheduled'
+        counts[label] = counts.get(label, 0) + 1
+    # 'Not scheduled' sorts before any year string, since '' < '2026' etc.
+    ordered = sorted(counts.items(), key=lambda kv: '' if kv[0] == 'Not scheduled' else kv[0])
+    return {'labels': [k for k, _ in ordered], 'values': [v for _, v in ordered]}
+

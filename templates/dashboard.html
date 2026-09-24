@@ -1,105 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
-
-{% block head_extra %}
-    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-{% endblock %}
+{% block title %}Test Dashboard{% endblock %}
 
 {% block content %}
-    <h1 class="mt-4">Dashboard</h1>
+    <h1 class="mt-4">Test Dashboard</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Dashboard</li>
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Test Dashboard</li>
     </ol>
     <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">{{ service_areas|length }} Service Areas</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ url_for('tables') }}">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-warning text-white mb-4">
-                <div class="card-body">Warning Card</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Placeholder</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-success text-white mb-4">
-                <div class="card-body">Success Card</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Placeholder</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-danger text-white mb-4">
-                <div class="card-body">Danger Card</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Placeholder</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xl-6">
+        <div class="col-lg-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    <i class="fas fa-chart-area me-1"></i>
-                    Area Chart Example
+                    <i class="fas fa-bolt me-1"></i>
+                    Service Areas by Grid Operator
                 </div>
-                <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
+                <div class="card-body"><canvas id="operatorChart" width="100%" height="60"></canvas></div>
             </div>
         </div>
-        <div class="col-xl-6">
+        <div class="col-lg-6">
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-chart-bar me-1"></i>
-                    Bar Chart Example
+                    Congestion Resolution Timeline (Injection)
                 </div>
-                <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
+                <div class="card-body"><canvas id="timelineChart" width="100%" height="60"></canvas></div>
             </div>
         </div>
     </div>
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-table me-1"></i>
-            Service Areas
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Top 10 Areas &ndash; Required Injection Capacity
+                </div>
+                <div class="card-body"><canvas id="topInjectionChart" width="100%" height="60"></canvas></div>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="datatablesSimple">
-                    <thead>
-                        <tr>
-                            {% for col in columns %}
-                            <th>{{ column_labels[col] }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr>
-                            {% for col in columns %}
-                            <th>{{ column_labels[col] }}</th>
-                            {% endfor %}
-                        </tr>
-                    </tfoot>
-                    <tbody>
-                        {% for row in service_areas %}
-                        <tr>
-                            {% for col in columns %}
-                            <td>{{ row[col] }}</td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Top 10 Areas &ndash; Required Withdrawal Capacity
+                </div>
+                <div class="card-body"><canvas id="topWithdrawalChart" width="100%" height="60"></canvas></div>
             </div>
         </div>
     </div>
@@ -107,13 +51,15 @@
 
 {% block scripts_extra %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-    <script type="application/json" id="area-chart-data">{{ area_chart|tojson|safe }}</script>
-    <script type="application/json" id="bar-chart-data">{{ bar_chart|tojson|safe }}</script>
+    <script type="application/json" id="operator-chart-data">{{ operator_chart|tojson|safe }}</script>
+    <script type="application/json" id="top-injection-chart-data">{{ top_injection_chart|tojson|safe }}</script>
+    <script type="application/json" id="top-withdrawal-chart-data">{{ top_withdrawal_chart|tojson|safe }}</script>
+    <script type="application/json" id="timeline-chart-data">{{ timeline_chart|tojson|safe }}</script>
     <script>
-        const areaChartData = JSON.parse(document.getElementById('area-chart-data').textContent);
-        const barChartData = JSON.parse(document.getElementById('bar-chart-data').textContent);
+        const operatorChartData = JSON.parse(document.getElementById('operator-chart-data').textContent);
+        const topInjectionChartData = JSON.parse(document.getElementById('top-injection-chart-data').textContent);
+        const topWithdrawalChartData = JSON.parse(document.getElementById('top-withdrawal-chart-data').textContent);
+        const timelineChartData = JSON.parse(document.getElementById('timeline-chart-data').textContent);
     </script>
-    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-    <script src="{{ url_for('static', filename='js/datatables-simple-demo.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/service-area-charts.js') }}"></script>
 {% endblock %}

@@ -5,9 +5,9 @@ from modules.data import (
     SERVICE_AREA_COLUMN_LABELS,
     SERVICE_AREA_COLUMNS,
     SERVICE_AREAS,
-    area_chart_data,
-    bar_chart_data,
-    pie_chart_data,
+    operator_counts,
+    resolution_timeline,
+    top_required_capacity,
 )
 
 app = Flask(__name__)
@@ -19,30 +19,22 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 def dashboard():
     return render_template(
         "dashboard.html",
-        service_areas=SERVICE_AREAS,
-        columns=SERVICE_AREA_COLUMNS,
-        column_labels=SERVICE_AREA_COLUMN_LABELS,
-        area_chart=area_chart_data(),
-        bar_chart=bar_chart_data(),
+        operator_chart=operator_counts(),
+        top_injection_chart=top_required_capacity("Injection"),
+        top_withdrawal_chart=top_required_capacity("Withdrawal"),
+        timeline_chart=resolution_timeline("Injection"),
     )
 
-@app.route("/charts")
-def charts():
-    return render_template(
-        "charts.html",
-        area_chart=area_chart_data(),
-        bar_chart=bar_chart_data(),
-        pie_chart=pie_chart_data(),
-    )
 
 @app.route("/tables")
-def tables():
+def data():
     return render_template(
-        "tables.html",
+        "data.html",
         service_areas=SERVICE_AREAS,
         columns=SERVICE_AREA_COLUMNS,
         column_labels=SERVICE_AREA_COLUMN_LABELS,
     )
+
 
 @app.route("/errors/<int:code>")
 def demo_error(code):
