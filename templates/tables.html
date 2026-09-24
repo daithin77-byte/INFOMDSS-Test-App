@@ -14,43 +14,36 @@
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-table me-1"></i>
-            Employees ({{ employees|length }} rows, served from Flask)
+            Service Areas ({{ service_areas|length }} rows,)
         </div>
         <div class="card-body">
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>Office</th>
-                        <th>Age</th>
-                        <th>Start date</th>
-                        <th>Salary</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>Office</th>
-                        <th>Age</th>
-                        <th>Start date</th>
-                        <th>Salary</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    {% for e in employees %}
-                    <tr>
-                        <td>{{ e.name }}</td>
-                        <td>{{ e.position }}</td>
-                        <td>{{ e.office }}</td>
-                        <td>{{ e.age }}</td>
-                        <td>{{ e.start_date }}</td>
-                        <td>{{ e.salary }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            {% for col in columns %}
+                            <th>{{ column_labels[col] }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            {% for col in columns %}
+                            <th>{{ column_labels[col] }}</th>
+                            {% endfor %}
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for row in service_areas %}
+                        <tr>
+                            {% for col in columns %}
+                            <td>{{ row[col] }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 {% endblock %}

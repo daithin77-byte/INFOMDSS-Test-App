@@ -1,22 +1,30 @@
 import os
 
 from flask import Flask, abort, render_template
-from modules.data import EMPLOYEES, area_chart_data, bar_chart_data, pie_chart_data
+from modules.data import (
+    SERVICE_AREA_COLUMN_LABELS,
+    SERVICE_AREA_COLUMNS,
+    SERVICE_AREAS,
+    area_chart_data,
+    bar_chart_data,
+    pie_chart_data,
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
 
-# Primary App Routes
+# Primary App Routes ------------------------------------------------------------------------------
 @app.route("/")
 def dashboard():
     return render_template(
         "dashboard.html",
-        employees=EMPLOYEES,
+        service_areas=SERVICE_AREAS,
+        columns=SERVICE_AREA_COLUMNS,
+        column_labels=SERVICE_AREA_COLUMN_LABELS,
         area_chart=area_chart_data(),
         bar_chart=bar_chart_data(),
     )
-
 
 @app.route("/charts")
 def charts():
@@ -27,11 +35,14 @@ def charts():
         pie_chart=pie_chart_data(),
     )
 
-
 @app.route("/tables")
 def tables():
-    return render_template("tables.html", employees=EMPLOYEES)
-
+    return render_template(
+        "tables.html",
+        service_areas=SERVICE_AREAS,
+        columns=SERVICE_AREA_COLUMNS,
+        column_labels=SERVICE_AREA_COLUMN_LABELS,
+    )
 
 @app.route("/errors/<int:code>")
 def demo_error(code):
@@ -41,7 +52,7 @@ def demo_error(code):
     abort(code)
 
 
-# Error Handlers
+# Error Handlers ----------------------------------------------------------------------------------
 @app.errorhandler(401)
 def unauthorized(_error):
     return render_template("errors/401.html"), 401

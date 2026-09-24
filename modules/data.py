@@ -3,20 +3,29 @@
 
 import csv
 import os
+import re
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_CSV_PATH = os.path.join(_PROJECT_ROOT, 'data', 'employees.csv')
+_CSV_PATH = os.path.join(_PROJECT_ROOT, 'data', 'nl_energy_service_areas.csv')
+_EXCLUDED_COLUMNS = {'projects', 'history'}
 
 
-def _load_employees():
+def _humanize(column: str) -> str:
+    """'existingTransportCapacityInjection' -> 'Existing Transport Capacity Injection'."""
+    spaced = re.sub(r'(?<!^)(?=[A-Z])', ' ', column).replace('_', ' ')
+    return spaced.strip().title()
+
+
+def _load_service_areas():
     with open(_CSV_PATH, newline='', encoding='utf-8') as f:
-        rows = list(csv.DictReader(f))
-    for row in rows:
-        row['age'] = int(row['age'])
-    return rows
+        reader = csv.DictReader(f)
+        columns = [c for c in reader.fieldnames if c not in _EXCLUDED_COLUMNS]
+        rows = [{c: row[c] for c in columns} for row in reader]
+    return columns, rows
 
 
-EMPLOYEES = _load_employees()
+SERVICE_AREA_COLUMNS, SERVICE_AREAS = _load_service_areas()
+SERVICE_AREA_COLUMN_LABELS = {c: _humanize(c) for c in SERVICE_AREA_COLUMNS}
 
 
 def area_chart_data():
