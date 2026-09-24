@@ -22,7 +22,6 @@
             Area Chart Example
         </div>
         <div class="card-body"><canvas id="myAreaChart" width="100%" height="30"></canvas></div>
-        <div class="card-footer small text-muted">Data served from Flask</div>
     </div>
     <div class="row">
         <div class="col-lg-6">
@@ -32,7 +31,6 @@
                     Bar Chart Example
                 </div>
                 <div class="card-body"><canvas id="myBarChart" width="100%" height="50"></canvas></div>
-                <div class="card-footer small text-muted">Data served from Flask</div>
             </div>
         </div>
         <div class="col-lg-6">
@@ -42,7 +40,6 @@
                     Pie Chart Example
                 </div>
                 <div class="card-body"><canvas id="myPieChart" width="100%" height="50"></canvas></div>
-                <div class="card-footer small text-muted">Data served from Flask</div>
             </div>
         </div>
     </div>
@@ -50,10 +47,13 @@
 
 {% block scripts_extra %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+    <script id="area-chart-data" type="application/json">{{ area_chart|tojson|safe }}</script>
+    <script id="bar-chart-data" type="application/json">{{ bar_chart|tojson|safe }}</script>
+    <script id="pie-chart-data" type="application/json">{{ pie_chart|tojson|safe }}</script>
     <script>
-        const areaChartData = {{ area_chart|tojson }};
-        const barChartData = {{ bar_chart|tojson }};
-        const pieChartData = {{ pie_chart|tojson }};
+        const areaChartData = JSON.parse(document.getElementById('area-chart-data').textContent);
+        const barChartData = JSON.parse(document.getElementById('bar-chart-data').textContent);
+        const pieChartData = JSON.parse(document.getElementById('pie-chart-data').textContent);
     </script>
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 {% endblock %}
